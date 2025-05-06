@@ -26,18 +26,18 @@ find "${PRESENTATIONS_DIR}" -mindepth 1 -maxdepth 1 -type d -print0 | while IFS=
     # Base path for subdirectory presentations: /<repository-name>/<slug>/
     # GH_PAGES_REPO_NAME is expected to be set in the environment by the GitHub Actions workflow
     BASE_PATH="/${GH_PAGES_REPO_NAME}/${presentation_slug}/"
-    # Output to a subfolder within 'dist' named after the slug
-    OUTPUT_DIR="./dist/${presentation_slug}"
+    # Output to a subfolder within 'dist' named after the slug. Use an absolute path.
+    ABS_OUTPUT_DIR="$(pwd)/dist/${presentation_slug}"
 
     echo "Calculated SUBDIR BASE_PATH: ${BASE_PATH}"
-    echo "Subdir Output directory: ${OUTPUT_DIR}"
+    echo "Subdir Output directory (absolute): ${ABS_OUTPUT_DIR}"
 
     # Ensure the specific output directory for the presentation exists
-    mkdir -p "${OUTPUT_DIR}"
+    mkdir -p "${ABS_OUTPUT_DIR}"
 
-    # Assumes your package.json has "build": "slidev build"
-    # nr runs: slidev build path/to/slides.md --base "/<repo-name>/<slug>/" --out "./dist/<slug>"
-    nr build "${slide_file_path}" --base "${BASE_PATH}" --out "${OUTPUT_DIR}"
+    # Use npx to call slidev directly, ensuring the correct slide_file_path is the entry point.
+    # This avoids conflicts if package.json's "build" script also specifies an entry point.
+    npx slidev build "${slide_file_path}" --base "${BASE_PATH}" --out "${ABS_OUTPUT_DIR}"
     echo "Build for ${presentation_slug} complete."
   else
     echo "--------------------------------------------------"

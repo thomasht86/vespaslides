@@ -12,9 +12,9 @@ if [ -f "slides.md" ]; then
   echo "Calculated ROOT_BASE_PATH: ${ROOT_BASE_PATH}"
   echo "Output directory: ${ROOT_OUTPUT_DIR}"
 
-  # Assumes your package.json has "build": "slidev build"
-  # nr runs this script: slidev build slides.md --base "/<repo-name>/" --out "./dist"
-  nr build slides.md --base "${ROOT_BASE_PATH}" --out "${ROOT_OUTPUT_DIR}"
+  # Use npx to call slidev directly, ensuring 'slides.md' is the entry point.
+  # This avoids conflicts if package.json's "build" script also specifies an entry point.
+  npx slidev build slides.md --base "${ROOT_BASE_PATH}" --out "${ROOT_OUTPUT_DIR}"
   echo "Root presentation build complete."
 else
   echo "No root slides.md found. Skipping root presentation build."
