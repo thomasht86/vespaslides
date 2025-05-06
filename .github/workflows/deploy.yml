@@ -41,12 +41,62 @@ jobs:
       - name: Prepare dist directory
         run: mkdir -p dist # Create the root dist directory where all built files will go
 
-      - name: Install dependencies
-        run: npm install
-      - name: Get talk title
-        run: echo "talk_title=$(basename "$(dirname "$(git show ${{ github.sha }} --name-only -- "presentations/" | grep "presentations/" | tail -n 1 )")")" >> "$GITHUB_ENV"
+      - name: Get talk info
+        id: talk_info
+        env:
+          GH_REPO_OWNER: ${{ github.repository_owner }}$GITHUB_ENV"
+        run: |
+          # Find the path to the last modified slides.md file within presentations/ in the commit
+          changed_slide_path=$(git diff-tree --no-commit-id --name-only -r ${{ github.sha }} -- "presentations/**/slides.md" | tail -n 1)
+
+          if [ -z "$changed_slide_path" ]; then
+            echo "::error::No slides.md file found in the changes within presentations/ directory for commit ${{ github.sha }}."
+            echo "If this was a manual dispatch or a push to main not directly modifying a slide, ensure the latest commit on the branch includes changes to a slides.md file."
+            exit 1
+          fi
+
+          echo "Processing slide file: $changed_slide_path"
+
+          # Get the directory of the slides.md file, e.g., presentations/2025-05-07-ai-teknologi
+          presentation_dir=$(dirname "$changed_slide_path")
+
+          # Get the base name of that directory, e.g., 2025-05-07-ai-teknologi
+          talk_title_full_val=$(basename "$presentation_dir")
+          echo "talk_title_full=$talk_title_full_val" >> "$GITHUB_ENV"
+
+          # Extract the part after YYYY-MM-DD- for the base URL path, e.g., ai-teknologi
+          base_url_path_name_val=$(echo "$talk_title_full_val" | sed -E 's/^[0-9]{4}-[0-9]{2}-[0-9]{2}-//')
+          echo "base_url_path_name=$base_url_path_name_val" >> "$GITHUB_ENV"
+
+          repo_name_val="${GITHUB_REPOSITORY#*/}"
+          echo "repo_name=$repo_name_val" >> "$GITHUB_ENV"
+
+          # Determine Slidev base URL:
+          # For user/org pages (e.g. username.github.io), base is /talks/talk-name
+          # For project pages (e.g. username.github.io/repo-name), base is /repo-name/talks/talk-name
+          slidev_base_url_prefix=""
+          if [ "$repo_name_val" != "${GH_REPO_OWNER}.github.io" ]; then
+            slidev_base_url_prefix="/${repo_name_val}"
+          fi
+          slidev_base_url_val="${slidev_base_url_prefix}/talks/${base_url_path_name_val}"
+          echo "slidev_base_url=$slidev_base_url_val" >> "$GITHUB_ENV"
+
+          # Define the output path for Slidev build, relative to the artifact root 'dist'
+          build_output_path_val="dist/talks/${base_url_path_name_val}"
+          echo "build_output_path=$build_output_path_val" >> "$GITHUB_ENV"
+
+          echo "Derived talk_title_full: $talk_title_full_val"
+          echo "Derived base_url_path_name: $base_url_path_name_val"
+          echo "Derived repo_name: $repo_name_val"
+          echo "Derived slidev_base_url: $slidev_base_url_val"
+          echo "Derived build_output_path: $build_output_path_val"
+
       - name: Build
-        run: npx slidev build --base /talks/${{env.talk_title}} presentations/${{env.talk_title}}/${{env.talk_title}}.md --per-slide
+        run: |
+          echo "Building presentation: presentations/${{env.talk_title_full}}/slides.md"
+          echo "Slidev base URL: ${{env.slidev_base_url}}"
+          echo "Slidev output directory: ${{env.build_output_path}}"
+          npx slidev build "presentations/${{env.talk_title_full}}/slides.md" --base "${{env.slidev_base_url}}" --out "${{env.build_output_path}}" --per-slide
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
