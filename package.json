@@ -5,7 +5,6 @@
   "scripts": {
     "build": "slidev build",
     "dev": "slidev --open",
-    "vespa": "slidev 2025-hvordan-velge-ai-teknologi.md --open",
     "export": "slidev export",
     "build:entry": "slidev build",
     "dev:entry": "slidev --open"
