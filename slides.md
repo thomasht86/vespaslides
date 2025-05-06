@@ -72,7 +72,7 @@ themeConfig:
   primaryLight: '#A4E1B5'
 
 # favicon, can be a local file path or URL
-favicon: './assets/favicon-green.png'
+favicon: '../../assets/favicon-green.png'
 # URL of PlantUML server used to render diagrams
 # Learn more: https://sli.dev/features/plantuml.html
 plantUmlServer: https://www.plantuml.com/plantuml

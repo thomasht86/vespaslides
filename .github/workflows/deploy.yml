@@ -32,7 +32,7 @@ jobs:
         run: nci
 
       - name: Build
-        run: nr build --base /${{github.event.repository.name}}/presentations/
+        run: nr build --base /${{github.event.repository.name}}/presentations/**/*.md
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
