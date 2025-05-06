@@ -41,24 +41,12 @@ jobs:
       - name: Prepare dist directory
         run: mkdir -p dist # Create the root dist directory where all built files will go
 
-      - name: Make scripts executable
-        run: |
-          chmod +x ./.github/scripts/build-root-presentation.sh
-          chmod +x ./.github/scripts/build-subdirectory-presentations.sh
-
-      # --- Build Root Presentation ---
-      # Builds slides.md from the root of your repository
-      - name: Build Root Presentation (if slides.md exists at root)
-        env:
-          GH_PAGES_REPO_NAME: ${{ github.event.repository.name }}
-        run: bash ./.github/scripts/build-root-presentation.sh
-
-      # --- Build Presentations from Subdirectories ---
-      # Discovers and builds presentations in the 'presentations' directory
-      - name: Discover and Build Presentations from Subdirectories
-        env:
-          GH_PAGES_REPO_NAME: ${{ github.event.repository.name }}
-        run: bash ./.github/scripts/build-subdirectory-presentations.sh
+      - name: Install dependencies
+        run: npm install
+      - name: Get talk title
+        run: echo "talk_title=$(basename "$(dirname "$(git show ${{ github.sha }} --name-only -- "presentations/" | grep "presentations/" | tail -n 1 )")")" >> "$GITHUB_ENV"
+      - name: Build
+        run: npx slidev build --base /talks/${{env.talk_title}} presentations/${{env.talk_title}}/${{env.talk_title}}.md --per-slide
 
       - name: Setup Pages
         uses: actions/configure-pages@v4

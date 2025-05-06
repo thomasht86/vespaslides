@@ -77,7 +77,7 @@ themeConfig:
   backgroundLight: '#F5F5F5'
 
 # favicon, can be a local file path or URL
-favicon: '../../assets/favicon-green.png'
+favicon: '/favicon-green.png'
 # URL of PlantUML server used to render diagrams
 # Learn more: https://sli.dev/features/plantuml.html
 plantUmlServer: https://www.plantuml.com/plantuml
@@ -136,7 +136,7 @@ Hvorfor riktig AI-valg er avgjørende for suksess.
 
 ::right::
 
-![Vespa](../../assets/favicon-green.png)
+![Vespa](/favicon-green.png)
 
 <!--
 Velkommen!
@@ -159,7 +159,7 @@ transition: slide-left
 
 ::right::
 
-![Grafikk](../../assets/graphic.png)
+![Grafikk](/graphic.png)
 
 <!--
 Kontekst: Mange AI-begreper (ML, GenAI, Agenter, RAG).
