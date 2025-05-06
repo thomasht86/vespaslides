@@ -41,82 +41,24 @@ jobs:
       - name: Prepare dist directory
         run: mkdir -p dist # Create the root dist directory where all built files will go
 
+      - name: Make scripts executable
+        run: |
+          chmod +x ./.github/scripts/build-root-presentation.sh
+          chmod +x ./.github/scripts/build-subdirectory-presentations.sh
+
       # --- Build Root Presentation ---
       # Builds slides.md from the root of your repository
       - name: Build Root Presentation (if slides.md exists at root)
         env:
           GH_PAGES_REPO_NAME: ${{ github.event.repository.name }}
-        run: |
-          if [ -f "slides.md" ]; then
-            echo "Building root slides.md..."
-            # Base path for root: /<repository-name>/
-            ROOT_BASE_PATH="/${GH_PAGES_REPO_NAME}/"
-            # Output directly into the 'dist' folder
-            ROOT_OUTPUT_DIR="./dist" 
-
-            echo "Input file: slides.md"
-            echo "Calculated ROOT_BASE_PATH: ${ROOT_BASE_PATH}"
-            echo "Output directory: ${ROOT_OUTPUT_DIR}"
-            
-            # Assumes your package.json has "build": "slidev build"
-            # nr runs this script: slidev build slides.md --base "/<repo-name>/" --out "./dist"
-            nr build slides.md --base "${ROOT_BASE_PATH}" --out "${ROOT_OUTPUT_DIR}"
-            echo "Root presentation build complete."
-          else
-            echo "No root slides.md found. Skipping root presentation build."
-          fi
+        run: bash ./.github/scripts/build-root-presentation.sh
 
       # --- Build Presentations from Subdirectories ---
       # Discovers and builds presentations in the 'presentations' directory
       - name: Discover and Build Presentations from Subdirectories
         env:
           GH_PAGES_REPO_NAME: ${{ github.event.repository.name }}
-        run: |
-          # Directory containing your presentation subfolders (e.g., presentations/my-talk/slides.md)
-          PRESENTATIONS_DIR="presentations" 
-
-          if [ ! -d "${PRESENTATIONS_DIR}" ]; then
-            echo "Directory ${PRESENTATIONS_DIR} not found. Skipping subdirectory presentations."
-            # Exiting with 0 so the workflow doesn't fail if this directory is optional
-            exit 0 
-          fi
-
-          echo "Looking for presentations in ./${PRESENTATIONS_DIR} ..."
-          # Loop through each immediate subdirectory in PRESENTATIONS_DIR
-          # Uses find ... -print0 and while read -d $'\0' for robustness with special characters in folder names
-          find "${PRESENTATIONS_DIR}" -mindepth 1 -maxdepth 1 -type d -print0 | while IFS= read -r -d $'\0' presentation_folder_path; do
-            # Extracts the folder name (e.g., "2025-07-05-ai-teknologi") to use as a slug
-            local presentation_slug
-            presentation_slug=$(basename "${presentation_folder_path}")
-            local slide_file_path="${presentation_folder_path}/slides.md"
-
-            if [ -f "${slide_file_path}" ]; then
-              echo "--------------------------------------------------"
-              echo "Building presentation: ${presentation_slug}"
-              echo "Source file: ${slide_file_path}"
-
-              # Base path for subdirectory presentations: /<repository-name>/<slug>/
-              BASE_PATH="/${GH_PAGES_REPO_NAME}/${presentation_slug}/"
-              # Output to a subfolder within 'dist' named after the slug
-              OUTPUT_DIR="./dist/${presentation_slug}" 
-
-              echo "Calculated SUBDIR BASE_PATH: ${BASE_PATH}"
-              echo "Subdir Output directory: ${OUTPUT_DIR}"
-              
-              # Ensure the specific output directory for the presentation exists
-              mkdir -p "${OUTPUT_DIR}"
-
-              # Assumes your package.json has "build": "slidev build"
-              # nr runs: slidev build path/to/slides.md --base "/<repo-name>/<slug>/" --out "./dist/<slug>"
-              nr build "${slide_file_path}" --base "${BASE_PATH}" --out "${OUTPUT_DIR}"
-              echo "Build for ${presentation_slug} complete."
-            else
-              echo "--------------------------------------------------"
-              echo "No slides.md found in ${presentation_folder_path}. Skipping this folder."
-            fi
-          done
-          echo "--------------------------------------------------"
-          echo "Subdirectory presentation builds finished."
+        run: bash ./.github/scripts/build-subdirectory-presentations.sh
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
