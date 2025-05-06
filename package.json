@@ -7,7 +7,8 @@
     "dev": "slidev --open",
     "vespa": "slidev 2025-hvordan-velge-ai-teknologi.md --open",
     "export": "slidev export",
-    "build:entry": "slidev build"
+    "build:entry": "slidev build",
+    "dev:entry": "slidev --open"
   },
   "dependencies": {
     "@iconify-json/mdi": "^1.2.3",
