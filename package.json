@@ -1,0 +1,19 @@
+{
+  "name": "vespaslides",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "slidev build",
+    "dev": "slidev --open",
+    "vespa": "slidev 2025-hvordan-velge-ai-teknologi.md --open",
+    "export": "slidev export",
+    "build:entry": "slidev build"
+  },
+  "dependencies": {
+    "@iconify-json/mdi": "^1.2.3",
+    "@slidev/cli": "^51.6.0",
+    "@slidev/theme-default": "latest",
+    "@slidev/theme-seriph": "latest",
+    "vue": "^3.5.13"
+  }
+}
